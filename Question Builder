@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GCSE AQA Geography Past Paper Builder</title>
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <h1>GCSE AQA Geography – Past Paper Builder</h1>
+
+  <!-- Assessment Info Form -->
+  <section>
+    <h2>Assessment Info</h2>
+    <label>Title: <input id="assessmentTitle" type="text" /></label><br />
+    <label>Name: <input id="studentName" type="text" /></label><br />
+    <label>Date: <input id="assessmentDate" type="date" /></label><br />
+    <label>Score (/ out of): <input id="scoreOutOf" type="number" /></label>
+  </section>
+
+  <!-- Question Builder -->
+  <section>
+    <h2>Add Questions</h2>
+    <label>Topic:
+      <select id="topicSelect"></select>
+    </label><br />
+
+    <label>Question Text:<br />
+      <textarea id="questionText" rows="4" cols="50"></textarea>
+    </label><br />
+
+    <label>Optional Image:
+      <input id="questionImage" type="file" accept="image/*" />
+    </label><br />
+
+    <button onclick="addQuestion()">Add Question</button>
+  </section>
+
+  <h2>Questions Added</h2>
+  <ul id="questionList"></ul>
+
+  <button onclick="generatePDF()">Generate PDF</button>
+
+  <script>
+    // Admin topics and images storage
+    const topics = {
+      "Natural Hazards": [],
+      "Urban Issues & Challenges": [],
+      "Changing Economic World": [],
+      "Physical Landscapes UK": [],
+      "Resource Management": []
+    };
+
+    const topicSelect = document.getElementById("topicSelect");
+
+    // Populate dropdown
+    Object.keys(topics).forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      topicSelect.appendChild(opt);
+    });
+
+    const questions = [];
+
+    function addQuestion() {
+      const topic = topicSelect.value;
+      const text = document.getElementById("questionText").value;
+      const imgFile = document.getElementById("questionImage").files[0];
+
+      if (!text.trim()) return alert("Enter question text.");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        questions.push({ topic, text, image: imgFile ? e.target.result : null });
+        renderQuestions();
+      };
+
+      if (imgFile) reader.readAsDataURL(imgFile);
+      else {
+        questions.push({ topic, text, image: null });
+        renderQuestions();
+      }
+    }
+
+    function renderQuestions() {
+      const list = document.getElementById("questionList");
+      list.innerHTML = "";
+      questions.forEach((q, i) => {
+        const li = document.createElement("li");
+        li.textContent = `${i+1}. [${q.topic}] ${q.text}`;
+        list.appendChild(li);
+      });
+    }
+
+    // PDF generation
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
+
+      doc.setFontSize(18);
+      doc.text(document.getElementById("assessmentTitle").value || "Assessment", 10, y);
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.text("Name: __________________________", 10, y);
+      y += 8;
+      doc.text(`Date: ${document.getElementById("assessmentDate").value || "________"}`, 10, y);
+      y += 8;
+      doc.text(`Score: ____ / ${document.getElementById("scoreOutOf").value || "___"}`, 10, y);
+      y += 15;
+
+      questions.forEach((q, i) => {
+        doc.text(`${i+1}. (${q.topic}) ${q.text}`, 10, y);
+        y += 10;
+        if (q.image) {
+          doc.addImage(q.image, "JPEG", 10, y, 60, 45);
+          y += 50;
+        }
+        if (y > 260) {
+          doc.addPage();
+          y = 20;
+        }
+      });
+
+      doc.save("AQA_Geography_Paper.pdf");
+    }
+  </script>
+</body>
+</html>
