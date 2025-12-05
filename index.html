@@ -12,11 +12,12 @@
 
   <!-- Assessment Info Form -->
   <section>
-    <h2>Assessment Info</h2>
-    <label>Title: <input id="assessmentTitle" type="text" /></label><br />
-    <label>Name: <input id="studentName" type="text" /></label><br />
-    <label>Date: <input id="assessmentDate" type="date" /></label><br />
-    <label>Score (/ out of): <input id="scoreOutOf" type="number" /></label>
+    <h2>Add Questions</h2>
+    <label>Topic:
+      <select id="topicSelect"></select>
+    </label><br />
+
+    <button onclick="addRandomQuestion()">Add Random Question</button>
   </section>
 
   <!-- Question Builder -->
@@ -43,9 +44,9 @@
   <button onclick="generatePDF()">Generate PDF</button>
 
   <script>
-    // Admin topics and images storage
+    // Admin topic folders containing images
     const topics = {
-      "Natural Hazards": [],
+      "Natural Hazards": [], // Add your image filenames here
       "Urban Issues & Challenges": [],
       "Changing Economic World": [],
       "Physical Landscapes UK": [],
@@ -64,17 +65,18 @@
 
     const questions = [];
 
-    function addQuestion() {
+    function addRandomQuestion() {
       const topic = topicSelect.value;
-      const text = document.getElementById("questionText").value;
-      const imgFile = document.getElementById("questionImage").files[0];
+      const images = topics[topic];
+      if (!images || images.length === 0) return alert("No images added for this topic.");
 
-      if (!text.trim()) return alert("Enter question text.");
+      const randomImg = images[Math.floor(Math.random() * images.length)];
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        questions.push({ topic, text, image: imgFile ? e.target.result : null });
-        renderQuestions();
+      questions.push({ topic, text: "", image: randomImg });
+      renderQuestions();
+    }
+
+    function renderQuestions()();
       };
 
       if (imgFile) reader.readAsDataURL(imgFile);
@@ -130,3 +132,4 @@
   </script>
 </body>
 </html>
+
